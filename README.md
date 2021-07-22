@@ -1,3 +1,29 @@
+## Lawson's Readme
+This is a slightly modified version of the vscode-clangd extension that simplifies working with Bazel based projects with a compile_commands.json file produced by [bazel-compilation-database](https://github.com/grailbio/bazel-compilation-database).
+It does this by automatically opening the source file of symlinked files which clangd tries to open (incorrectly) by default. See [these](https://github.com/clangd/clangd/issues/197) [issues](https://github.com/clangd/clangd/issues/629) for more [details](https://github.com/clangd/clangd/issues/544).
+
+### Installation
+First unistall vscode-clangd if you were previously using it in vscode.
+
+Make sure you have node installed
+```
+brew install node
+```
+Then install the vscode extension tools
+```
+npm install -g vsce
+```
+In the root of this repo, build the extension with
+```
+vsce package
+```
+Install into vscode with
+```
+code --install-extension  vscode-clangd-0.1.12.vsix
+```
+
+Now when you start up vscode it should run. It may ask you if you want to install clangd which you should agree to.
+
 # clangd
 
 Provides C/C++ language IDE features for VS Code using [clangd](https://clangd.llvm.org):
