@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as vscodelc from 'vscode-languageclient/node';
+import { LocationLink } from 'vscode-languageclient/node';
+import { realpathSync } from 'fs';
 
 import * as ast from './ast';
 import * as config from './config';
@@ -142,6 +144,29 @@ export class ClangdContext implements vscode.Disposable {
             }
             return symbol;
           })
+        },
+
+        provideDefinition: async (document, position, token, next) => {
+          let defRes = await next(document, position, token);
+          
+          if (LocationLink.is(defRes) || !defRes) {
+            return defRes;
+          }
+
+          // Follow symlinks
+          let update = (loc: vscode.Location) => {
+            const resolvedUri = realpathSync(loc.uri.fsPath);
+            console.log("Mapped URI " + loc.uri.fsPath + " ==> " + resolvedUri);
+            loc.uri = vscode.Uri.file(resolvedUri);
+            return loc;
+          };
+
+          let def = <vscode.Definition>defRes;
+          if (Array.isArray(def)) {
+            return def.map(update);
+          } else {
+            return update(def);
+          }
         },
       },
     };
