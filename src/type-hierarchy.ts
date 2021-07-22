@@ -8,7 +8,8 @@
 import * as vscode from 'vscode';
 import * as vscodelc from 'vscode-languageclient/node';
 
-import {ClangdContext} from './clangd-context';
+import { ClangdContext } from './clangd-context';
+import { realpathSync } from 'fs';
 
 export function activate(context: ClangdContext) {
   const feature = new TypeHierarchyFeature(context);
@@ -181,8 +182,9 @@ class TypeHierarchyProvider implements
   public async gotoItem(item: TypeHierarchyItem) {
     const uri = vscode.Uri.parse(item.uri);
     const range =
-        this.client.protocol2CodeConverter.asRange(item.selectionRange);
-    const doc = await vscode.workspace.openTextDocument(uri);
+      this.client.protocol2CodeConverter.asRange(item.selectionRange);
+    const resolvedUri = realpathSync(uri.fsPath); // Follow symlinks
+    const doc = await vscode.workspace.openTextDocument(resolvedUri);
     let editor: vscode.TextEditor|undefined;
     if (doc) {
       editor = await vscode.window.showTextDocument(doc, undefined);
